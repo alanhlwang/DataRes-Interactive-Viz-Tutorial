@@ -1,0 +1,111 @@
+---
+title: "DataRes Interactive Viz Tutorial"
+output: html_notebook
+---
+
+
+```{r}
+# install.packages('plotly')
+library(plotly)
+
+fig <- plot_ly(
+  x = c("giraffes", "orangutans", "monkeys"),
+  y = c(20, 14, 23),
+  name = "SF Zoo",
+  type = "bar"
+)
+
+fig
+```
+```{r}
+Animals <- c("giraffes", "orangutans", "monkeys")
+SF_Zoo <- c(20, 14, 23)
+LA_Zoo <- c(12, 18, 29)
+data <- data.frame(Animals, SF_Zoo, LA_Zoo)
+
+fig <- plot_ly(data, x = ~Animals, y = ~SF_Zoo, type = 'bar', name = 'SF Zoo')
+fig <- fig %>% add_trace(y = ~LA_Zoo, name = 'LA Zoo')
+fig <- fig %>% layout(yaxis = list(title = 'Count'), barmode = 'stack')
+
+fig
+```
+
+
+
+```{r}
+library(plotly)
+
+USPersonalExpenditure <- data.frame("Categorie"=rownames(USPersonalExpenditure), USPersonalExpenditure)
+data <- USPersonalExpenditure[,c('Categorie', 'X1960')]
+
+fig <- plot_ly(data, labels = ~Categorie, values = ~X1960, type = 'pie')
+fig <- fig %>% layout(title = 'United States Personal Expenditures by Categories in 1960',
+         xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+         yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
+
+fig
+```
+
+```{r}
+library(plotly)
+library(dplyr)
+
+# Get Manufacturer
+mtcars$manuf <- sapply(strsplit(rownames(mtcars), " "), "[[", 1)
+
+df <- mtcars
+df <- df %>% group_by(manuf)
+df <- df %>% summarize(count = n())
+fig <- df %>% plot_ly(labels = ~manuf, values = ~count)
+fig <- fig %>% add_pie(hole = 0.6)
+fig <- fig %>% layout(title = "Donut charts using Plotly",  showlegend = F,
+                      xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+                      yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
+
+fig
+```
+
+```{r}
+library(plotly)
+
+# install.packages('rjson')
+library(rjson)
+
+url <- 'https://raw.githubusercontent.com/plotly/datasets/master/geojson-counties-fips.json'
+counties <- rjson::fromJSON(file=url)
+url2<- "https://raw.githubusercontent.com/plotly/datasets/master/fips-unemp-16.csv"
+df <- read.csv(url2, colClasses=c(fips="character"))
+g <- list(
+  scope = 'usa',
+  projection = list(type = 'albers usa'),
+  showlakes = TRUE,
+  lakecolor = toRGB('white')
+)
+fig <- plot_ly()
+fig <- fig %>% add_trace(
+    type="choropleth",
+    geojson=counties,
+    locations=df$fips,
+    z=df$unemp,
+    colorscale="Viridis",
+    zmin=0,
+    zmax=12,
+    marker=list(line=list(
+      width=0)
+    )
+  )
+fig <- fig %>% colorbar(title = "Unemployment Rate (%)")
+fig <- fig %>% layout(
+    title = "2016 US Unemployment by County"
+)
+
+fig <- fig %>% layout(
+    geo = g
+  )
+
+fig
+```
+```{r}
+head(df)
+```
+
